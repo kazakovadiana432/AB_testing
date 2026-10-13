@@ -1,0 +1,39 @@
+## Metric set
+
+| Role | Metric | Expected direction (treatment) | Why |
+|---|---|---|---|
+| Primary | Genuine recovery completion rate | Down (~2–4 pp) | Extra phone step → more genuine drop-off |
+| Guardrail | Takeovers blocked (rate) | Up | Fraud fails the check more often |
+| Guardrail | Support contacts / attempt | Up (modest) | Confused users hit support |
+| Guardrail | Time to complete | Up, right-skewed | Codes take time; only among who finish |
+
+## Primary vs guardrail
+
+Primary answers: Did we hurt real members getting back in?
+Guardrails answer: Did security improve, and did ops blow up?
+Do not declare success if a guardrail wins while the primary fails.
+
+## How to measure “ops blew up”
+
+Measured in [src/effects.py](../src/effects.py). Thresholds locked in [config/settings.py](../config/settings.py).
+
+| Question | Metric in data | Pass / fail rule |
+|---|---|---|
+| Did security improve? | takeover_blocked rate among is_fraud=1 | lift (treat − ctrl) >= 10 pp |
+| Did support explode? | mean support_contact by variant | treat / ctrl >= 2.0 → explode |
+| Is time painfully slow? | median time_to_complete_min among completed=1 | treat / ctrl >= 2.0 or (treat − ctrl) >= +3 min → painful |
+| Ops veto (do not ship) | combine rows above | (support explode or time painful) and security lift < 10 pp |
+
+Modest rises below those bars are expected friction, not a kill.
+
+## The “genuine users” trap
+
+Simulation cheat: we store true is_fraud, so “completion among genuine” is exact.
+Real life: approximate (e.g. exclude takeover_flagged). Noisy — some fraud looks clean, some genuine looks risky.
+
+Beginner trap
+Making completion and takeovers both “primary,” then celebrating whichever moves.
+
+Conclusion
+Success is judged on genuine completion staying within pain; security/ops can veto but are not the win condition.
+“Worth it” needs MDE + costs ([product_question.md](product_question.md), [cost_assumptions.md](cost_assumptions.md)).
