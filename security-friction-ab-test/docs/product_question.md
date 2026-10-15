@@ -1,5 +1,3 @@
-# Step 1. Product question
-
 ## Product question
 
 Does adding a phone-verification step to account recovery reduce successful account takeovers without losing too many genuine members who need to get back in?
@@ -38,19 +36,3 @@ Ops guardrail kill thresholds (locked in [config/settings.py](../config/settings
 | Do not ship (Y) | Net value at €60 / €400 is <= 0, or completion drop is >= 5 pp, or guardrails hit the threshold. |
 | Iterate (Z) | Net near zero / finance disputes the €60 or €400 labels, or the completion hit is concentrated on one device (e.g. web much worse) — redesign that slice, no full rollout. |
 
-## Hypothesis and design (primary metric)
-
-Primary: genuine recovery completion rate
-p_t = treatment
-p_c = control
-
-| | |
-|---|---|
-| H0 | p_t = p_c — phone verification does not change genuine completion |
-| H1 | p_t ≠ p_c — two-sided; rates differ (we expect p_t < p_c, but we test both ways) |
-| alpha | 0.05 |
-| Power | 0.80 |
-| Baseline | 0.80 (assumed control completion) |
-| MDE | 0.02 (2 pp) — smallest drop we care to detect (80% → 78%) |
-
-Numbers are locked in [config/settings.py](../config/settings.py) and used by [src/design.py](../src/design.py) for sample size.
