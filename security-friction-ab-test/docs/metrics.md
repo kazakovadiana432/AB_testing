@@ -10,10 +10,10 @@
 ## Primary vs guardrail
 
 Primary answers: Did we hurt real members getting back in?
-Guardrails answer: Did security improve, and did ops blow up?
+Guardrails answer: Did security improve, and did operations blow up?
 Do not declare success if a guardrail wins while the primary fails.
 
-## How to measure “ops blew up”
+## How to measure that opearations are not successful
 
 Measured in [src/effects.py](../src/effects.py). Thresholds locked in [config/settings.py](../config/settings.py).
 

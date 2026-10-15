@@ -35,4 +35,4 @@ Shared for this experiment: independent attempts (`attempt_id`); random assignme
 | Time to complete | Mann-Whitney U among completers; ship rule uses median ratio / lift | Independence of samples (control vs treatment completers). Comparable ranks (minutes). No need for normality. | Time is skewed; rank test fits better than a t-test; thresholds still use medians |
 | Device segments | Two-proportion z-test per device, then Benjamini-Hochberg (FDR) | Per device: independence of samples, binary completion, sufficient data for normal approximation. BH only adjusts those p-values — each device test must already be trustworthy on its own. | In testing several slices BH limits false discoveries by adjusting alpha; This measure for exploration only, not a second primary metric |
 
-Ship or no-ship decision follows the rules in [product_question.md](product_question.md) (net value, 5 pp hard stop, ops thresholds), not p-value alone.
+Ship or no-ship decision follows the rules in [product_question.md](product_question.md) (net value, 5 pp hard stop, operations thresholds), not p-value alone.
