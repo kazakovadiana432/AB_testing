@@ -22,7 +22,7 @@ Break-even roughly when takeover cost >= 5.5× lost-genuine cost
 It is not an automatic kill switch: a drop a bit above 2 pp can still ship if net value is clearly positive
 A >= 5 pp completion drop is treated as too much friction regardless of the euro math
 
-Operations guardrail kill thresholds (locked in [config/settings.py](../config/settings.py); see [metrics.md](metrics.md))
+Operations guardrail reach thresholds (locked in [config/settings.py](../config/settings.py); see [metrics.md](metrics.md))
 
 | Guardrail | Measure | Kill if |
 |---|---|---|
