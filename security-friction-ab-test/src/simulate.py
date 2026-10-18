@@ -33,6 +33,11 @@ from config.settings import (
     START_DATE,
     TREAT_COMPLETE_DROP,
     TREAT_TAKEOVER_SUCCESS,
+    TIME_CTRL_MEDIAN,
+    TIME_TREAT_MEDIAN,
+    TIME_SIGMA,
+    P_SUPPORT_CTRL,
+    P_SUPPORT_TREAT
  )
 import warnings
 #ignore future warnings
@@ -88,3 +93,12 @@ completion_probs = np.where(anomaly, completion_probs * ANOMALY_COMPLETE_MULT, c
 
 #define who completed recovery
 completed = rng.random(N_ATTEMPTS) < completion_probs
+
+#set median time for completing verification for treatment and control
+log_m = np.where(is_treat, np.log(TIME_TREAT_MEDIAN), np.log(TIME_CTRL_MEDIAN))
+
+time_min = rng.lognormal(mean=log_m, sigma=TIME_SIGMA)
+time_min = np.where(completed, time_min, np.nan)
+
+support_probs = np.where(is_treat, P_SUPPORT_TREAT, P_SUPPORT_CTRL)
+support_contact = rng.random(N_ATTEMPTS) < support_probs
