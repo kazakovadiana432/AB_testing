@@ -102,3 +102,62 @@ time_min = np.where(completed, time_min, np.nan)
 
 support_probs = np.where(is_treat, P_SUPPORT_TREAT, P_SUPPORT_CTRL)
 support_contact = rng.random(N_ATTEMPTS) < support_probs
+
+#define who was blocked from takeover
+takeover_blocked = is_fraud & (completed == False)
+
+df = pd.DataFrame(
+    {
+        "attempt_id": np.arange(1, N_ATTEMPTS + 1),
+        "user_id": rng.integers(1_000_000, 9_999_999, size=N_ATTEMPTS),
+        "date": dates,
+        "variant": variant,
+        "device": device,
+        "country": country,
+        "is_fraud": is_fraud.astype(int),
+        "completed": completed.astype(int),
+        "time_to_complete_min": np.round(time_min, 2),
+        "support_contact": support_contact.astype(int),
+        "takeover_blocked": takeover_blocked.astype(int),
+        "anomaly_day": anomaly.astype(int),
+    }
+)
+
+#write to csv
+DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+df.to_csv(DATA_PATH, index=False)
+log.info(
+    "Wrote %s rows -> %s (anomaly rows=%s)",
+    f"{len(df):,}",
+    DATA_PATH,
+    f"{df['anomaly_day'].sum():,}",
+)
+
+
+if __name__ == "__main__":
+    n = len(df)
+    print(f"Wrote {n:,} rows -> {DATA_PATH}")
+    print(df["variant"].value_counts(normalize=True).round(3))
+    print()
+    g = df[df["is_fraud"] == 0]
+    print("Genuine completion by variant:")
+    print(g.groupby("variant")["completed"].mean())
+    print()
+    f = df[df["is_fraud"] == 1]
+    print(f"Fraud attempts: {len(f):,} ({len(f) / n:.2%})")
+    print("Fraud takeover success (completed) by variant:")
+    print(f.groupby("variant")["completed"].mean())
+    print()
+    print("Support rate by variant:")
+    print(df.groupby("variant")["support_contact"].mean())
+    print()
+    print("Median time (completers) by variant:")
+    print(
+        df[df["completed"] == 1]
+        .groupby("variant")["time_to_complete_min"]
+        .median()
+        .round(2)
+    )
+    print()
+    print(f"Anomaly rows ({ANOMALY_DEVICE} {ANOMALY_DATE}): {df['anomaly_day'].sum():,}")
