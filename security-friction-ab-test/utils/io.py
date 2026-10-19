@@ -1,4 +1,4 @@
-"""Set up import paths for a non-installed project."""
+"""Load data and set up import paths for a non-installed project."""
 
 import sys
 from pathlib import Path
@@ -15,3 +15,9 @@ def ensure_project_on_path():
         if s not in sys.path:
             sys.path.insert(0, s)
     return root
+
+def load_recovery_data(path=None):
+    from config.paths import DATA_PATH
+
+    path = path or DATA_PATH
+    return pd.read_csv(path, parse_dates=["date"])
