@@ -40,7 +40,7 @@ ALPHA = 0.05
 POWER = 0.80
 
 # guardrail thresholds for operations veto
-SUPPORT_RATE_RATIO_MAX = 2.0  # treatment / control; >= this = support "explodes"
+SUPPORT_RATE_RATIO_MAX = 2.0  # treatment / control >= this = support reaches threshold
 TIME_MEDIAN_RATIO_MAX = 2.0  # treatment / control median minutes among completers
 TIME_MEDIAN_LIFT_MAX_MIN = 3.0  # or absolute lift >= this many minutes
 TAKEOVER_BLOCK_LIFT_MIN = 0.10  # "little security gain" for operations veto: 
@@ -55,3 +55,10 @@ TAKEOVER_COST_GRID = [100, 250, 400, 750, 1000]
 
 # primary friction hard veto
 COMPLETION_DROP_HARD_MAX = 0.05  # >= 5 pp drop => do not ship regardless of net value
+
+# sanity checks
+SRM_P_THRESHOLD = 0.001
+BALANCE_P_THRESHOLD = 0.05  # p-value threshold for balance test
+
+# effects parameters
+BOOTSTRAP_B = 3000

@@ -34,8 +34,8 @@ def metrics_analysis(df):
     # completion rates
     ctrl = g.loc[g["variant"] == "control", "completed"]
     treat = g.loc[g["variant"] == "treatment", "completed"]
-    p_c = ctrl.mean()
-    p_t = treat.mean()
+    ctrl_completion_rate = ctrl.mean()
+    treat_completion_rate = treat.mean()
 
     # hypothesis testing with z-test for completion rate difference
     success_counts = [treat.sum(), ctrl.sum()]
@@ -45,8 +45,8 @@ def metrics_analysis(df):
     ci_low, ci_high = confint_proportions_2indep(
         success_counts[0], sample_sizes[0], success_counts[1], sample_sizes[1], compare="diff", method="wald", alpha=ALPHA
     )
-    print(f"control completion rate: {p_c:.4f} (n={len(ctrl):,})  treatment completion rate: {p_t:.4f} (n={len(treat):,})")
-    print(f"completion rate difference: {p_t - p_c:.4f}  95% CI [{ci_low:.4f}, {ci_high:.4f}]")
+    print(f"control completion rate: {ctrl_completion_rate:.4f} (n={len(ctrl):,})  treatment completion rate: {treat_completion_rate:.4f} (n={len(treat):,})")
+    print(f"completion rate difference: {treat_completion_rate - ctrl_completion_rate:.4f}  95% CI [{ci_low:.4f}, {ci_high:.4f}]")
     print(f"z={z_stat:.3f}, p={p_val:.2e}")
     print(f"significant at alpha={ALPHA:.2f}:", p_val < ALPHA)
 
@@ -162,11 +162,29 @@ def metrics_analysis(df):
     print(f"guardrails failed: {guardrails_failed}")
 
     return {
-        "p_c": p_c,
-        "p_t": p_t,
-        "block_c": fc.mean(),
-        "block_t": ft.mean(),
-        "operations_veto": guardrails_failed,
+        "ctrl_completion_rate": ctrl_completion_rate,
+        "treat_completion_rate": treat_completion_rate,
+        "completion_rate_difference": treat_completion_rate - ctrl_completion_rate,
+        "z_stat_completion_rate": z_stat,
+        "p_val_completion_rate": p_val,
+        "ci_low_completion_rate": ci_low,
+        "ci_high_completion_rate": ci_high,
+        "bootstrap_mean_diff_completion_rate": np.mean(boot_diffs),
+        "bootstrap_ci_low_completion_rate": ci_b_low,
+        "bootstrap_ci_high_completion_rate": ci_b_high,
+        "ctrl_takeover_blocked_rate": fc.mean(),
+        "treat_takeover_blocked_rate": ft.mean(),
+        "z_stat_takeover_blocked": z_tb,
+        "p_val_takeover_blocked": p_tb,
+        "ctrl_support_contact_rate": sc.mean(),
+        "treat_support_contact_rate": st.mean(),
+        "z_stat_support_contact": z_s,
+        "p_val_support_contact": p_s,
+        "time_median_ctrl": tc.median(),
+        "time_median_treat": tt.median(),
+        "time_median_difference": tt.median() - tc.median(),
+        "p_val_time_median": p_time,
+        "device_results": device_results,
         "guardrails_failed": guardrails_failed,
     }
 
