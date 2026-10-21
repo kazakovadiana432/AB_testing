@@ -1,4 +1,4 @@
-"""Sanity checks for the simulation data. SRM and covariate balance."""
+"""Sanity checks: data quality, SRM, covariate balance."""
 
 import sys
 from pathlib import Path
@@ -10,10 +10,39 @@ from utils.io import load_recovery_data
 import pandas as pd
 from scipy.stats import chi2_contingency, chisquare
 
-from config.settings import SRM_P_THRESHOLD, BALANCE_P_THRESHOLD
+from config.settings import (
+    BALANCE_P_THRESHOLD,
+    COUNTRY_SHARES,
+    DEVICE_SHARES,
+    SRM_P_THRESHOLD,
+)
 
+def data_quality_checks(df):
+    print("--- Data quality ---")
+    issues = []
+    key_cols = [c for c in df.columns if c != "time_to_complete_min"]
+    if df[key_cols].isna().any().any():
+        issues.append("unexpected nulls")
+    if ((df["completed"] == 1) & df["time_to_complete_min"].isna()).any():
+        issues.append("completers missing time")
+    if not df["attempt_id"].is_unique:
+        issues.append("duplicate attempt_id")
+    if not df["variant"].isin(["control", "treatment"]).all():
+        issues.append("bad variant")
+    if not df["device"].isin(DEVICE_SHARES).all():
+        issues.append("bad device")
+    if not df["country"].isin(COUNTRY_SHARES).all():
+        issues.append("bad country")
+    flags = ["is_fraud", "completed", "support_contact", "takeover_blocked", "anomaly_day"]
+    if not df[flags].isin([0, 1]).all().all():
+        issues.append("flags not 0/1")
+    if (df["time_to_complete_min"] < 0).any():
+        issues.append("negative time")
 
-def run_sanity(df):
+    print("Data quality:", "FAIL - " + "; ".join(issues) if issues else "PASS")
+    return len(issues) == 0
+
+def sanity_checks(df):
     print("--- Sanity checks ---")
     counts = df["variant"].value_counts()
     print(counts)
@@ -23,7 +52,6 @@ def run_sanity(df):
 
     print(f"treatment share: {counts['treatment'] / n:.4f}")
     print(f"SRM test results: chi2={chi2_srm:.3f}, p={p_srm:.4f}")
-    # print(f"result for SRM test (fail if p < {SRM_P_THRESHOLD}): {'PASS' if passed else 'FAIL'}")
 
     chi2_device, p_device, _, _ = chi2_contingency(pd.crosstab(df["variant"], df["device"]))
     print("\nDevice shares")
@@ -36,7 +64,7 @@ def run_sanity(df):
     print(pd.crosstab(df["variant"], df["country"], normalize="index").round(3))
     print(f"Country balance test results: chi2={chi2_country:.3f}, p={p_country:.4f}")
     passed_country = p_country >= BALANCE_P_THRESHOLD
-    
+
     print(f"SRM test passed: {'PASS' if passed else 'FAIL'}")
     print(f"Device balance test passed: {'PASS' if passed_device else 'FAIL'}")
     print(f"Country balance test passed: {'PASS' if passed_country else 'FAIL'}")
@@ -53,4 +81,6 @@ def run_sanity(df):
 
 if __name__ == "__main__":
     df = load_recovery_data()
-    run_sanity(df)
+    data_quality_checks(df)
+    print()
+    sanity_checks(df)
