@@ -8,10 +8,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from utils.io import ensure_project_on_path
-
-ensure_project_on_path()
-
 import numpy as np
 import pandas as pd
 
