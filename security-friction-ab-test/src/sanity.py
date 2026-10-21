@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from utils.io import load_recovery_data
+from utils.logging_config import get_logger
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -19,9 +20,11 @@ from config.settings import (
     SRM_P_THRESHOLD,
 )
 
+log = get_logger("sanity")
+
 
 def data_quality_checks(df):
-    print("--- Data quality ---")
+    log.info("\n\nRunning data quality checks")
     issues = []
     key_cols = [c for c in df.columns if c != "time_to_complete_min"]
     if df[key_cols].isna().any().any():
@@ -47,7 +50,7 @@ def data_quality_checks(df):
 
 
 def eda_checks(df):
-    print("--- EDA ---")
+    log.info("\n\nRunning EDA checks")
     print(df.shape)
     print(df.head())
     print()
@@ -126,7 +129,7 @@ def eda_checks(df):
 
 
 def sanity_checks(df):
-    print("--- Sanity checks ---")
+    log.info("\n\nRunning sanity checks")
     counts = df["variant"].value_counts()
     print(counts)
     n = counts.sum()

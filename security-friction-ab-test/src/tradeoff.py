@@ -17,6 +17,8 @@ from config.settings import (
 
 from utils.io import load_recovery_data
 from src.effects import metrics_analysis
+from utils.logging_config import get_logger
+log = get_logger("tradeoff")
 
 
 def run_tradeoff(
@@ -26,7 +28,7 @@ def run_tradeoff(
     ctrl_takeover_blocked_rate,
     treat_takeover_blocked_rate,
 ):
-    print("--- Cost sensitivity analysis ---")
+    log.info("\n\nRunning cost sensitivity analysis")
     fraud_rate = df["is_fraud"].mean()
     drop = ctrl_completion_rate - treat_completion_rate
     lift_block = treat_takeover_blocked_rate - ctrl_takeover_blocked_rate

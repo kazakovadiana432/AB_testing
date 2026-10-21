@@ -13,7 +13,7 @@ from statsmodels.stats.multitest import multipletests
 from statsmodels.stats.proportion import confint_proportions_2indep, proportions_ztest
 
 from utils.io import load_recovery_data
-
+from utils.logging_config import get_logger
 from config.settings import (
     ALPHA,
     BOOTSTRAP_B,
@@ -25,12 +25,14 @@ from config.settings import (
 )
 
 
+log = get_logger("effects")
+
 def metrics_analysis(df):
+    log.info("\n\nRunning metrics analysis")
     rng = np.random.default_rng(SEED)
     g = df[df["is_fraud"] == 0]
     f = df[df["is_fraud"] == 1]
 
-    print("--- Primary metrics ---")
     # completion rates
     ctrl = g.loc[g["variant"] == "control", "completed"]
     treat = g.loc[g["variant"] == "treatment", "completed"]

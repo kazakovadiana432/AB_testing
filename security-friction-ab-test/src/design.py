@@ -11,6 +11,8 @@ from statsmodels.stats.proportion import proportion_effectsize
 
 from config.settings import ALPHA, BASELINE, MDE, POWER
 from utils.io import load_recovery_data
+from utils.logging_config import get_logger
+log = get_logger("design")
 
 def power_analysis(df):
     effect_size = proportion_effectsize(BASELINE, BASELINE - MDE)
@@ -33,7 +35,7 @@ def power_analysis(df):
     current_volume = df[df["is_fraud"] == 0].groupby("variant").size()
 
     print()
-    print("--- Power analysis ---")
+    log.info("\n\nRunning power analysis")
     print(f"Cohen's h: {effect_size:.4f}")
     print(f"Daily genuine {daily_genuine:,.0f}  ->  {daily_per_variant:,.0f}/variant")
     print(f"Required days: {days_needed:.1f} days | available days: {n_days} days")

@@ -4,7 +4,9 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+from utils.logging_config import get_logger
 
+log = get_logger("io")
 
 def ensure_project_on_path():
     """Add project root + src/ so `config`, `utils`, and analysis modules import cleanly."""
@@ -17,6 +19,8 @@ def ensure_project_on_path():
     return root
 
 def load_recovery_data(path=None):
+    """Load recovery data from the data directory."""
+    log.info(f"Loading recovery data from {path}")
     from config.paths import DATA_PATH
 
     path = path or DATA_PATH
