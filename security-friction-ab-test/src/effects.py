@@ -86,3 +86,14 @@ def metrics_analysis(df):
 
     print(f"Support contact (among genuine) control support contact rate: {sc.mean():.4f}  treatment support contact rate: {st.mean():.4f}  "
         f"diff={st.mean() - sc.mean():.4f} z={z_s:.3f}, p={p_s:.2e}")
+
+    # guardrail metric with Mann-Whitney test for time to complete difference
+    tc = df.loc[
+        (df["variant"] == "control") & (df["completed"] == 1), "time_to_complete_min"
+    ]
+    tt = df.loc[
+        (df["variant"] == "treatment") & (df["completed"] == 1), "time_to_complete_min"
+    ]
+    _, p_time = stats.mannwhitneyu(tt, tc, alternative="two-sided")
+    print("\nTime to complete (Mann-Whitney)")
+    print(f"median ctrl={tc.median():.2f}  treat={tt.median():.2f}  p={p_time:.2e}")
