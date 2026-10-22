@@ -20,8 +20,8 @@ def ensure_project_on_path():
 
 def load_recovery_data(path=None):
     """Load recovery data from the data directory."""
-    log.info(f"Loading recovery data from {path}")
     from config.paths import DATA_PATH
 
     path = path or DATA_PATH
+    log.info(f"Loading recovery data from {path}")
     return pd.read_csv(path, parse_dates=["date"])

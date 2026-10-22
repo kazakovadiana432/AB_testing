@@ -28,7 +28,7 @@ def run_tradeoff(
     ctrl_takeover_blocked_rate,
     treat_takeover_blocked_rate,
 ):
-    log.info("\n\nRunning cost sensitivity analysis")
+    log.info("Running cost sensitivity analysis")
     fraud_rate = df["is_fraud"].mean()
     drop = ctrl_completion_rate - treat_completion_rate
     lift_block = treat_takeover_blocked_rate - ctrl_takeover_blocked_rate

@@ -16,7 +16,7 @@ from utils.logging_config import get_logger
 log = get_logger("anomaly")
 
 def run_anomaly(df, fig_path=FIG_PATH):
-    log.info("\n\nRunning anomaly detection")
+    log.info("Running anomaly detection")
     g = df[df["is_fraud"] == 0]
     n_anom = g["anomaly_day"].sum()
     print(f"Investigating planted anomaly {ANOMALY_DEVICE}/{ANOMALY_DATE} ({n_anom} genuine rows flagged)")
