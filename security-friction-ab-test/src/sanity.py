@@ -24,65 +24,57 @@ log = get_logger("sanity")
 
 
 def data_quality_checks(df):
-    log.info("\n\nRunning data quality checks")
-    issues = []
+    log.info("Running data quality checks")
     key_cols = [c for c in df.columns if c != "time_to_complete_min"]
-    if df[key_cols].isna().any().any():
-        issues.append("unexpected nulls")
-    if ((df["completed"] == 1) & df["time_to_complete_min"].isna()).any():
-        issues.append("completers missing time")
-    if not df["attempt_id"].is_unique:
-        issues.append("duplicate attempt_id")
-    if not df["variant"].isin(["control", "treatment"]).all():
-        issues.append("bad variant")
-    if not df["device"].isin(DEVICE_SHARES).all():
-        issues.append("bad device")
-    if not df["country"].isin(COUNTRY_SHARES).all():
-        issues.append("bad country")
     flags = ["is_fraud", "completed", "support_contact", "takeover_blocked", "anomaly_day"]
-    if not df[flags].isin([0, 1]).all().all():
-        issues.append("flags not 0/1")
-    if (df["time_to_complete_min"] < 0).any():
-        issues.append("negative time")
-
-    print("Data quality:", "FAIL - " + "; ".join(issues) if issues else "PASS")
-    return len(issues) == 0
+    failed = {
+        "unexpected nulls": df[key_cols].isna().any().any(),
+        "completers missing time": ((df["completed"] == 1) & df["time_to_complete_min"].isna()).any(),
+        "duplicate attempt_id": not df["attempt_id"].is_unique,
+        "variant not in control or treatment": not df["variant"].isin(["control", "treatment"]).all(),
+        "device not in device options": not df["device"].isin(DEVICE_SHARES).all(),
+        "country not in country options": not df["country"].isin(COUNTRY_SHARES).all(),
+        "flags not 0/1": not df[flags].isin([0, 1]).all().all(),
+        "negative time": (df["time_to_complete_min"] < 0).any(),
+    }
+    return pd.DataFrame(
+        {"check": list(failed), "status": ["FAIL" if flag else "PASS" for flag in failed.values()]}
+    )
 
 
 def eda_checks(df):
-    log.info("\n\nRunning EDA checks")
-    print(df.shape)
-    print(df.head())
-    print()
-    print("fraud rate:", round(df["is_fraud"].mean(), 4))
+    log.info("Running EDA checks")
+    print("\nfraud rate:", round(df["is_fraud"].mean(), 4))
     g = df[df["is_fraud"] == 0]
     print("\nGenuine completion:")
     print(g.groupby("variant")["completed"].mean().round(3))
     print()
-    print("Support contact rate:")
+    print("\nSupport contact rate:")
     print(df.groupby("variant")["support_contact"].mean().round(3))
     print()
-    print("Time to complete (median minutes):")
+    print("\nTime to complete (median minutes):")
     print(
         df[df["completed"] == 1]
         .groupby("variant")["time_to_complete_min"]
         .median()
         .round(2)
     )
+    print("\nTakeover blocked (among fraud):")
+    print(df[df["is_fraud"] == 1].groupby("variant")["takeover_blocked"].mean().round(3))
 
     # weekday volume
     weekday = df["date"].dt.day_name()
     order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    print("\nVolume by weekday:")
+    print("\n\nVolume by weekday:")
     print(weekday.value_counts().reindex(order))
-    print("\nCompleted attempts by weekday:")
+    print("\n\nCompleted attempts by weekday:")
     print(weekday[df["completed"] == 1].value_counts().reindex(order))
-    print("\nFraud attempts by weekday:")
+    print("\n\nFraud attempts by weekday:")
     print(weekday[df["is_fraud"] == 1].value_counts().reindex(order))
 
-    print("\nFraud rate by device:")
+    print("\n\nFraud rate by device:")
     print(df.groupby("device")["is_fraud"].mean().round(4))
-    print("\nFraud rate by country:")
+    print("\n\nFraud rate by country:")
     print(df.groupby("country")["is_fraud"].mean().round(4))
 
     # plots
@@ -104,6 +96,22 @@ def eda_checks(df):
     plt.ylabel("attempts")
     plt.tight_layout()
     plt.savefig(DATA_DIR / "eda_weekday.png", dpi=100)
+    plt.close()
+
+    weekday[df["completed"] == 1].value_counts().reindex(order).plot(
+        kind="bar", title="Completed attempts by weekday"
+    )
+    plt.ylabel("attempts")
+    plt.tight_layout()
+    plt.savefig(DATA_DIR / "eda_completed_weekday.png", dpi=100)
+    plt.close()
+
+    weekday[df["is_fraud"] == 1].value_counts().reindex(order).plot(
+        kind="bar", title="Fraud attempts by weekday"
+    )
+    plt.ylabel("attempts")
+    plt.tight_layout()
+    plt.savefig(DATA_DIR / "eda_fraud_weekday.png", dpi=100)
     plt.close()
 
     # duration for completed attempts
@@ -129,7 +137,7 @@ def eda_checks(df):
 
 
 def sanity_checks(df):
-    log.info("\n\nRunning sanity checks")
+    log.info("Running sanity checks")
     counts = df["variant"].value_counts()
     print(counts)
     n = counts.sum()
