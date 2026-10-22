@@ -1,5 +1,7 @@
 # Recommendation: phone verification on account recovery
 
+The walk-through behind this page, with the printed results and the reasoning, is in [`notebooks/findings.ipynb`](../notebooks/findings.ipynb).
+
 ## Question
 Does adding phone verification to account recovery reduce takeovers without losing too many genuine members?
 
