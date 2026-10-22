@@ -45,7 +45,7 @@ log.info(
     sanity["p_country"],
 )
 # statistical analysis
-eff = metrics_analysis(df)
+eff = metrics_analysis(df, verbose=True)
 
 # cost sensitivity analysis
 trade = run_tradeoff(df, eff["ctrl_completion_rate"], eff["treat_completion_rate"], eff["ctrl_takeover_blocked_rate"], eff["treat_takeover_blocked_rate"])
