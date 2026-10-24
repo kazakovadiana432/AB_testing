@@ -44,6 +44,10 @@ log.info(
     sanity["p_device"],
     sanity["p_country"],
 )
+
+# power analysis
+power_analysis(df)
+
 # statistical analysis
 eff = metrics_analysis(df, verbose=True)
 
