@@ -17,6 +17,7 @@ Docs set the decision frame that the analysis is supposed to answer.
 4. `docs/experiment_design.md` has the hypothesis, power thinking, and the statistical methods used downstream.
 5. `docs/cost_assumptions.md` is why we use €60 per lost genuine recovery and €400 per takeover in the trade-off.
 6. `docs/recommendation.md` is the one-page conclusion over the data we saw in the project with recomendations for ship/no-ship decision.
+7. `notebooks/findings.ipynb` is the notebook with step-by-step analysis and conclusions drawn from the results.
 
 Assumptions and sample-size knobs live in `config/settings.py`. File locations for the CSV and figures are in `config/paths.py`.
 
