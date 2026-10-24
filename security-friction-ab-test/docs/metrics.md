@@ -17,8 +17,8 @@ Do not declare success if a guardrail wins while the primary fails.
 
 Measured in [src/effects.py](../src/effects.py). Thresholds locked in [config/settings.py](../config/settings.py).
 
-| Question | Metric in data | Pass / fail rule |
+| Question | Metric in data | Fail rule |
 |---|---|---|
-| Did security improve? | takeover_blocked rate among is_fraud=1 | lift (treat − ctrl) >= 10 pp |
+| Did security improve? | takeover_blocked rate among is_fraud=1 | lift (treat − ctrl) < 10 pp |
 | Did support time increased dramatically? | treat / ctrl >= 2.0 |
 | Is time to complete verification too slow? | median time_to_complete_min among completed=1 | treat / ctrl >= 2.0 or (treat − ctrl) >= +3 min |
