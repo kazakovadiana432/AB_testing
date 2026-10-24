@@ -81,6 +81,11 @@ def metrics_analysis(df, verbose=False):
     sample_blocked_sizes = [len(ft), len(fc)]
 
     z_tb, p_tb = proportions_ztest(success_blocked_counts, sample_blocked_sizes)
+    ci_tb_low, ci_tb_high = confint_proportions_2indep(
+        success_blocked_counts[0], sample_blocked_sizes[0],
+        success_blocked_counts[1], sample_blocked_sizes[1],
+        compare="diff", method="wald", alpha=ALPHA,
+    )
 
     say(f"Takeover blocked (among fraud) \n\tcontrol takeover blocked rate: {fc.mean():.4f}  \n\ttreatment takeover blocked rate: {ft.mean():.4f}  "
         f"\n\tdiff={ft.mean() - fc.mean():.4f} z={z_tb:.3f}, p={p_tb:.2e}")
@@ -93,9 +98,14 @@ def metrics_analysis(df, verbose=False):
     sample_contact_sizes = [len(st), len(sc)]
 
     z_s, p_s = proportions_ztest(success_contact_counts, sample_contact_sizes)
+    ci_s_low, ci_s_high = confint_proportions_2indep(
+        success_contact_counts[0], sample_contact_sizes[0],
+        success_contact_counts[1], sample_contact_sizes[1],
+        compare="ratio", method="score", alpha=ALPHA,
+    )
 
     say(f"Support contact (among genuine) \n\tcontrol support contact rate: {sc.mean():.4f}  \n\ttreatment support contact rate: {st.mean():.4f}  "
-        f"\n\tdiff={st.mean() - sc.mean():.4f} z={z_s:.3f}, p={p_s:.2e}")
+        f"\n\tratio={st.mean() / sc.mean():.4f} z={z_s:.3f}, p={p_s:.2e}")
 
     # guardrail metric with Mann-Whitney test for time to complete difference
     tc = df.loc[
@@ -107,6 +117,25 @@ def metrics_analysis(df, verbose=False):
     _, p_time = stats.mannwhitneyu(tt, tc, alternative="two-sided")
     say("\nTime to complete (Mann-Whitney)")
     say(f"median ctrl={tc.median():.2f}  treat={tt.median():.2f}  p={p_time:.2e}")
+
+    # bootstrap check for time to complete difference and ratio
+    say("\n--- Bootstrap check for time to complete median difference ---")
+    c_vals = tc.values
+    t_vals = tt.values
+    n_bootstraps = BOOTSTRAP_B
+    boot_medians_difference = []
+    boot_medians_ratio = []
+
+    for i in range(n_bootstraps):
+        treat_sample = rng.choice(t_vals, size=len(t_vals), replace=True)
+        ctrl_sample = rng.choice(c_vals, size=len(c_vals), replace=True)
+
+        boot_medians_difference.append(np.median(treat_sample) - np.median(ctrl_sample))
+        boot_medians_ratio.append(np.median(treat_sample) / np.median(ctrl_sample)) if np.median(ctrl_sample) > 0 else float("inf")
+    ci_b_low_difference, ci_b_high_difference = np.percentile(boot_medians_difference, [2.5, 97.5])
+    ci_b_low_ratio, ci_b_high_ratio = np.percentile(boot_medians_ratio, [2.5, 97.5])
+    say(f"bootstrap time to complete median difference={np.median(boot_medians_difference):.4f}  95% CI [{ci_b_low_difference:.4f}, {ci_b_high_difference:.4f}]")
+    say(f"bootstrap time to complete median ratio={np.median(boot_medians_ratio):.4f}  95% CI [{ci_b_low_ratio:.4f}, {ci_b_high_ratio:.4f}]")
 
     results = []
     for device in g["device"].unique():
@@ -183,13 +212,25 @@ def metrics_analysis(df, verbose=False):
         "treat_takeover_blocked_rate": ft.mean(),
         "z_stat_takeover_blocked": z_tb,
         "p_val_takeover_blocked": p_tb,
+        "ci_low_takeover_blocked": ci_tb_low,
+        "ci_high_takeover_blocked": ci_tb_high,
         "ctrl_support_contact_rate": sc.mean(),
         "treat_support_contact_rate": st.mean(),
         "z_stat_support_contact": z_s,
         "p_val_support_contact": p_s,
+        "ci_low_support_contact": ci_s_low,
+        "ci_high_support_contact": ci_s_high,
+        "support_ratio": support_ratio,
+        "time_ratio": time_ratio,
+        "time_lift": time_lift,
+        "block_lift": block_lift,
         "time_median_ctrl": tc.median(),
         "time_median_treat": tt.median(),
         "time_median_difference": tt.median() - tc.median(),
+        "bootstrap_ci_low_median_difference": ci_b_low_difference,
+        "bootstrap_ci_high_median_difference": ci_b_high_difference,
+        "bootstrap_ci_low_median_ratio": ci_b_low_ratio,
+        "bootstrap_ci_high_median_ratio": ci_b_high_ratio,
         "p_val_time_median": p_time,
         "device_results": device_results,
         "guardrails_failed": guardrails_failed,
