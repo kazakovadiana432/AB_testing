@@ -20,5 +20,5 @@ Measured in [src/effects.py](../src/effects.py). Thresholds locked in [config/se
 | Question | Metric in data | Fail rule |
 |---|---|---|
 | Did security improve? | takeover_blocked rate among is_fraud=1 | lift (treat − ctrl) < 10 pp |
-| Did support time increased dramatically? | treat / ctrl >= 2.0 |
+| Did number of support contacts increased dramatically? |support_contact rate among all attempts | treat / ctrl >= 2.0 |
 | Is time to complete verification too slow? | median time_to_complete_min among completed=1 | treat / ctrl >= 2.0 or (treat − ctrl) >= +3 min |
